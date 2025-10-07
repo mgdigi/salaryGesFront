@@ -5,17 +5,32 @@ const ColorPicker = ({ value, onChange, label, className = '' }) => {
 
   const predefinedColors = [
     '#f97316', // Orange (défaut)
-    '#3b82f6', // Blue
     '#10b981', // Green
-    '#ef4444', // Red
     '#8b5cf6', // Purple
     '#f59e0b', // Yellow
-    '#ec4899', // Pink
     '#6b7280', // Gray
-    '#059669', // Emerald
     '#dc2626', // Red-600
     '#2563eb', // Blue-600
-    '#7c3aed', // Violet
+     '#556B2F' , //vert fonce
+     '#F7F4EA' , //beige 
+     '#FF4500' , //orange fonce
+     '#2E8B57' , //vert moyen
+     '#4682B4' , //bleu acier
+     '#D2691E' , //chocolat
+     '#5F9EA0' , //bleu cadet
+     '#FF6347' , //tomate
+     '#40E0D0' , //turquoise
+     '#9ACD32' , //jaune vert
+     '#FF69B4' , //rose vif
+     '#A52A2A' , //brun
+     '#7FFF00' , //vert chartreuse
+     '#DC143C' , //crimson
+     '#FF8C00' , //orange fonce
+     '#FF1493', //rose profond
+     '#4B0082', //indigo
+     '#3B1C32', //mauve fonce
+     '#2F4F4F', //gris ardoise fonce
+     '#1A1A1D', //noir presque
   ];
 
   const handleColorSelect = (color) => {

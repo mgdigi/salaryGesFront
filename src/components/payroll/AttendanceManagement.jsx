@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { attendanceApi } from '../../api/attendanceApi';
 import { payRunApi } from '../../api/payRunApi';
 import { employeeApi } from '../../api/employeeApi';
+import { absenceAutomationApi } from '../../api/absenceAutomationApi';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Notification from '../common/Notification';
-import { Calendar, Clock, User, CheckCircle, XCircle, AlertTriangle, Plus } from 'lucide-react';
+import QRScanner from './QRScanner';
+import { Calendar, Clock, User, CheckCircle, XCircle, AlertTriangle, Plus, QrCode, Zap } from 'lucide-react';
 
 const AttendanceManagement = () => {
   const { payRunId } = useParams();
@@ -26,6 +28,7 @@ const AttendanceManagement = () => {
   });
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [activeTab, setActiveTab] = useState('manual');
   const [bulkAttendanceData, setBulkAttendanceData] = useState({
     startDate: '',
     endDate: '',
@@ -34,6 +37,7 @@ const AttendanceManagement = () => {
     isPresent: true,
     notes: ''
   });
+  const [absenceStats, setAbsenceStats] = useState(null);
 
   useEffect(() => {
     if (payRunId) {
@@ -53,11 +57,69 @@ const AttendanceManagement = () => {
       setPayRun(payRunResponse.payRun);
       setAttendances(attendancesResponse.attendances);
       setEmployees(employeesResponse.employees || []);
+
+      // Charger les statistiques d'absences si disponibles
+      try {
+        const statsResponse = await absenceAutomationApi.getAbsenceStatistics(payRunId);
+        setAbsenceStats(statsResponse.stats);
+      } catch (error) {
+        console.log('Statistiques d\'absences non disponibles');
+      }
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       Notification.error('Erreur', 'Impossible de charger les données');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAttendanceMarked = (employee) => {
+    Notification.success('Présence enregistrée', `${employee.firstName} ${employee.lastName} a été marqué présent`);
+    fetchPayRunAndAttendances();
+  };
+
+  const handleMarkAutomaticAbsences = async () => {
+    const result = await Notification.confirm(
+      'Marquage automatique des absences',
+      'Cela va automatiquement marquer comme absents tous les employés qui n\'ont pas pointé aujourd\'hui. Voulez-vous continuer ?',
+      'Marquer les absences',
+      'Annuler'
+    );
+
+    if (result.isConfirmed) {
+      try {
+        const response = await absenceAutomationApi.markAutomaticAbsences(payRun.companyId);
+        Notification.success('Succès', `${response.result.absencesMarked} absences marquées automatiquement`);
+        fetchPayRunAndAttendances();
+      } catch (error) {
+        console.error('Erreur lors du marquage automatique:', error);
+        Notification.error('Erreur', 'Impossible de marquer les absences automatiquement');
+      }
+    }
+  };
+
+  const handleMarkAbsencesForDate = async (date) => {
+    if (!date) {
+      Notification.error('Erreur', 'Veuillez sélectionner une date');
+      return;
+    }
+
+    const result = await Notification.confirm(
+      'Marquer les absences pour une date',
+      `Cela va marquer comme absents tous les employés qui n'ont pas pointé le ${new Date(date).toLocaleDateString('fr-FR')}. Voulez-vous continuer ?`,
+      'Marquer les absences',
+      'Annuler'
+    );
+
+    if (result.isConfirmed) {
+      try {
+        const response = await absenceAutomationApi.markAbsencesForDate(payRun.companyId, date);
+        Notification.success('Succès', `${response.result.absencesMarked} absences marquées pour le ${new Date(date).toLocaleDateString('fr-FR')}`);
+        fetchPayRunAndAttendances();
+      } catch (error) {
+        console.error('Erreur lors du marquage des absences:', error);
+        Notification.error('Erreur', 'Impossible de marquer les absences');
+      }
     }
   };
 
@@ -246,131 +308,263 @@ const AttendanceManagement = () => {
             </p>
           )}
         </div>
-        <Button
-          onClick={() => setShowModal(true)}
-          variant="primary"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau pointage
-        </Button>
-      </div>
-
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">Génération en masse</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">Date début</label>
-            <input
-              type="date"
-              value={bulkAttendanceData.startDate}
-              onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, startDate: e.target.value})}
-              className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">Date fin</label>
-            <input
-              type="date"
-              value={bulkAttendanceData.endDate}
-              onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, endDate: e.target.value})}
-              className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">Type</label>
-            <select
-              value={bulkAttendanceData.type}
-              onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, type: e.target.value})}
-              className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="PRESENCE">Présence</option>
-              <option value="ABSENCE_JUSTIFIEE">Absence justifiée</option>
-              <option value="ABSENCE_INJUSTIFIEE">Absence injustifiée</option>
-              <option value="CONGE">Congé</option>
-              <option value="MALADIE">Maladie</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">Heures (optionnel)</label>
-            <input
-              type="number"
-              step="0.5"
-              value={bulkAttendanceData.hours}
-              onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, hours: e.target.value})}
-              className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="8"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end">
+        <div className="flex space-x-3">
           <Button
-            onClick={handleBulkGenerateAttendances}
+            onClick={() => setShowModal(true)}
+            variant="outline"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau pointage
+          </Button>
+          <Button
+            onClick={handleMarkAutomaticAbsences}
             variant="primary"
           >
-            Générer les pointages
+            <Zap className="w-4 h-4 mr-2" />
+            Marquer absences auto
           </Button>
         </div>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul className="divide-y divide-gray-200">
-          {attendances.map((attendance) => (
-            <li key={`${attendance.employeeId}-${attendance.date}`} className="px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  {getAttendanceIcon(attendance.type)}
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-900">
-                        {attendance.employee.firstName} {attendance.employee.lastName}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-sm text-gray-500">
-                        {new Date(attendance.date).toLocaleDateString('fr-FR')}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {getAttendanceLabel(attendance.type)}
-                      </span>
-                      {attendance.hours && (
-                        <span className="text-sm text-gray-500">
-                          {attendance.hours}h
-                        </span>
-                      )}
-                    </div>
-                    {attendance.notes && (
-                      <p className="text-sm text-gray-500 mt-1">{attendance.notes}</p>
-                    )}
-                  </div>
+      {/* Onglets */}
+      <div className="bg-white shadow rounded-lg mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('manual')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'manual'
+                  ? 'border-orange-500 text-orange-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <User className="w-4 h-4 inline mr-2" />
+              Gestion manuelle
+            </button>
+            <button
+              onClick={() => setActiveTab('qr')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'qr'
+                  ? 'border-orange-500 text-orange-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <QrCode className="w-4 h-4 inline mr-2" />
+              Scan QR Code
+            </button>
+            <button
+              onClick={() => setActiveTab('automation')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'automation'
+                  ? 'border-orange-500 text-orange-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Zap className="w-4 h-4 inline mr-2" />
+              Automatisation
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Contenu selon l'onglet actif */}
+      {activeTab === 'manual' && (
+        <>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4">Génération en masse</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">Date début</label>
+                <input
+                  type="date"
+                  value={bulkAttendanceData.startDate}
+                  onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, startDate: e.target.value})}
+                  className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">Date fin</label>
+                <input
+                  type="date"
+                  value={bulkAttendanceData.endDate}
+                  onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, endDate: e.target.value})}
+                  className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">Type</label>
+                <select
+                  value={bulkAttendanceData.type}
+                  onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, type: e.target.value})}
+                  className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="PRESENCE">Présence</option>
+                  <option value="ABSENCE_JUSTIFIEE">Absence justifiée</option>
+                  <option value="ABSENCE_INJUSTIFIEE">Absence injustifiée</option>
+                  <option value="CONGE">Congé</option>
+                  <option value="MALADIE">Maladie</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">Heures (optionnel)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={bulkAttendanceData.hours}
+                  onChange={(e) => setBulkAttendanceData({...bulkAttendanceData, hours: e.target.value})}
+                  className="w-full border border-blue-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="8"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={handleBulkGenerateAttendances}
+                variant="primary"
+              >
+                Générer les pointages
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'qr' && (
+        <div className="mb-6">
+          <QRScanner
+            payRunId={payRunId}
+            onAttendanceMarked={handleAttendanceMarked}
+          />
+        </div>
+      )}
+
+      {activeTab === 'automation' && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+          <h3 className="text-lg font-semibold text-green-900 mb-4">Automatisation des absences</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white p-4 rounded-lg border border-green-200">
+              <h4 className="font-medium text-green-900 mb-2">Marquage automatique quotidien</h4>
+              <p className="text-sm text-green-700 mb-3">
+                Marque automatiquement comme absents tous les employés qui n'ont pas pointé aujourd'hui.
+              </p>
+              <Button
+                onClick={handleMarkAutomaticAbsences}
+                variant="primary"
+                className="w-full"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Marquer absences aujourd'hui
+              </Button>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-green-200">
+              <h4 className="font-medium text-green-900 mb-2">Marquage pour une date spécifique</h4>
+              <p className="text-sm text-green-700 mb-3">
+                Choisissez une date pour marquer les absences automatiquement.
+              </p>
+              <div className="flex space-x-2">
+                <input
+                  type="date"
+                  className="flex-1 border border-green-300 rounded-md px-3 py-2 focus:ring-green-500 focus:border-green-500"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleMarkAbsencesForDate(e.target.value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {absenceStats && (
+            <div className="bg-white p-4 rounded-lg border border-green-200">
+              <h4 className="font-medium text-green-900 mb-3">Statistiques du cycle</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">{absenceStats.totalAttendances}</div>
+                  <div className="text-sm text-green-700">Total pointages</div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    onClick={() => handleEdit(attendance)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(attendance.id)}
-                    variant="danger"
-                    size="sm"
-                  >
-                    Supprimer
-                  </Button>
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{absenceStats.presentDays}</div>
+                  <div className="text-sm text-blue-700">Présences</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-yellow-600">{absenceStats.absentJustified}</div>
+                  <div className="text-sm text-yellow-700">Absences justifiées</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-600">{absenceStats.absentUnjustified}</div>
+                  <div className="text-sm text-red-700">Absences injustifiées</div>
                 </div>
               </div>
-            </li>
-          ))}
-        </ul>
-        {attendances.length === 0 && (
-          <div className="text-center py-12">
-            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">Aucun pointage enregistré pour ce cycle</p>
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Liste des pointages (uniquement dans l'onglet manuel) */}
+      {activeTab === 'manual' && (
+        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul className="divide-y divide-gray-200">
+            {attendances.map((attendance) => (
+              <li key={`${attendance.employeeId}-${attendance.date}`} className="px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    {getAttendanceIcon(attendance.type)}
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {attendance.employee.firstName} {attendance.employee.lastName}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-1">
+                        <span className="text-sm text-gray-500">
+                          {new Date(attendance.date).toLocaleDateString('fr-FR-R')}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {getAttendanceLabel(attendance.type)}
+                        </span>
+                        {attendance.hours && (
+                          <span className="text-sm text-gray-500">
+                            {attendance.hours}h
+                          </span>
+                        )}
+                      </div>
+                      {attendance.notes && (
+                        <p className="text-sm text-gray-500 mt-1">{attendance.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      onClick={() => handleEdit(attendance)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Modifier
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(attendance.id)}
+                      variant="danger"
+                      size="sm"
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {attendances.length === 0 && (
+            <div className="text-center py-12">
+              <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Aucun pointage enregistré pour ce cycle</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal */}
       <Modal

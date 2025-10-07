@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CircleGauge, Building2, Users, BanknoteArrowUp, CreditCard, LogOut, Menu, X, ChevronDown, ClipboardClock, FileText } from 'lucide-react';
+import { CircleGauge, Building2, Users, BanknoteArrowUp, CreditCard, LogOut, Menu, X, ChevronDown, ClipboardClock, FileText, Calendar, QrCode } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 
 const Layout = ({ children, stats: propStats }) => {
@@ -50,7 +50,6 @@ const Layout = ({ children, stats: propStats }) => {
     };
   }, []);
 
-  // Écouter les événements de mise à jour des statistiques
   useEffect(() => {
     const handleStatsUpdate = (event) => {
       if (event.detail) {
@@ -78,6 +77,8 @@ const Layout = ({ children, stats: propStats }) => {
       { name: 'Employés', path: '/employees', icon: Users },
       { name: 'Cycles de paie', path: '/payruns', icon: BanknoteArrowUp },
       { name: 'Pointage quotidien', path: '/daily-attendance', icon: ClipboardClock },
+      { name: 'Congés', path: '/leaves', icon: Calendar },
+      { name: 'QR Codes', path: '/qr-codes', icon: QrCode },
     ],
     CAISSIER: [
       { name: 'Tableau de bord', path: '/dashboard', icon: CircleGauge },

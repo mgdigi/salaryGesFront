@@ -11,8 +11,10 @@ import EmployeeDetails from './pages/EmployeeDetails';
 import PayRuns from './pages/PayRuns';
 import Payments from './pages/Payments';
 import Companies from './pages/Companies';
+import LeaveManagement from './pages/LeaveManagement';
 import AttendanceManagement from './components/payroll/AttendanceManagement';
 import DailyAttendance from './components/payroll/DailyAttendance';
+import QRCodeGenerator from './components/payroll/QRCodeGenerator';
 import Layout from './components/layout/Layout';
 import './App.css';
 
@@ -90,6 +92,24 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <Companies />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/leaves"
+                      element={
+                        <ProtectedRoute allowedRoles={['ADMIN']}>
+                          <LeaveManagement />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/qr-codes"
+                      element={
+                        <ProtectedRoute allowedRoles={['ADMIN']}>
+                          <Layout>
+                            <QRCodeGenerator />
+                          </Layout>
                         </ProtectedRoute>
                       }
                     />

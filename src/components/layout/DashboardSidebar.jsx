@@ -1,16 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Users, FileText, CreditCard, ClipboardClock, X, ChevronRight } from 'lucide-react';
+import { BarChart3, Users, FileText, CreditCard, ClipboardClock, Calendar, QrCode, X, ChevronRight } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const DashboardSidebar = ({ isOpen, onClose, user, stats }) => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
 
   const quickActions = [
-    { name: 'Cycles de paie', path: '/payruns', icon: BarChart3, description: 'Gérer les cycles de paie', key: 'payruns-manage' },
-    { name: 'Employés', path: '/employees', icon: Users, description: 'Gérer les employés', key: 'employees' },
-    { name: 'Bulletins', path: '/payruns', icon: FileText, description: 'Générer les bulletins', key: 'payruns-slips' },
-    { name: 'pointage', path: '/daily-attendance', icon: ClipboardClock, description: 'gerer le pointage', key: 'daily-attendance' }
-  ];
+    { name: 'Cycles de paie', path: '/payruns', icon: BarChart3, description: 'Gérer les cycles de paie', key: 'payruns-manage', roles: ['ADMIN'] },
+    { name: 'Employés', path: '/employees', icon: Users, description: 'Gérer les employés', key: 'employees', roles: ['ADMIN'] },
+    { name: 'Bulletins', path: '/payruns', icon: FileText, description: 'Générer les bulletins', key: 'payruns-slips', roles: ['ADMIN'] },
+    { name: 'Pointage', path: '/daily-attendance', icon: ClipboardClock, description: 'Gérer le pointage', key: 'daily-attendance', roles: ['ADMIN', 'CAISSIER'] },
+    { name: 'Congés', path: '/leaves', icon: Calendar, description: 'Gérer les congés', key: 'leaves', roles: ['ADMIN'] },
+    { name: 'QR Codes', path: '/qr-codes', icon: QrCode, description: 'Gérer les QR codes', key: 'qr-codes', roles: ['ADMIN'] }
+  ].filter(action => !action.roles || action.roles.includes(authUser?.role));
 
   return (
     <>

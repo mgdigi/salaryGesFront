@@ -307,26 +307,52 @@ const DashboardStats = () => {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="p-8">
-                    <div className="flex items-center justify-center mb-6">
-                      <div className="p-4 bg-gray-100 rounded-2xl">
-                        <CreditCard className="w-12 h-12 text-gray-600" />
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl shadow-sm border border-orange-200 overflow-hidden">
+                    <div className="p-8">
+                      <div className="flex items-center justify-center mb-6">
+                        <div className="p-4 bg-orange-100 rounded-2xl">
+                          <TrendingUp className="w-12 h-12 text-orange-600" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
+                        Pointage QR Code
+                      </h3>
+                      <p className="text-center text-gray-600 mb-8">
+                        Scannez les QR codes des employés pour marquer automatiquement leur présence
+                      </p>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => navigate('/daily-attendance')}
+                          className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                          Commencer le pointage
+                        </button>
                       </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
-                      Gestion des paiements
-                    </h3>
-                    <p className="text-center text-gray-600 mb-8">
-                      Enregistrez les paiements, générez les reçus et consultez les bulletins
-                    </p>
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => navigate('/payments')}
-                        className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold rounded-xl hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                      >
-                        Accéder aux paiements
-                      </button>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="p-8">
+                      <div className="flex items-center justify-center mb-6">
+                        <div className="p-4 bg-gray-100 rounded-2xl">
+                          <CreditCard className="w-12 h-12 text-gray-600" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
+                        Gestion des paiements
+                      </h3>
+                      <p className="text-center text-gray-600 mb-8">
+                        Enregistrez les paiements, générez les reçus et consultez les bulletins
+                      </p>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => navigate('/payments')}
+                          className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold rounded-xl hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                          Accéder aux paiements
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
