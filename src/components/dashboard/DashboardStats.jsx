@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, Users, CircleDollarSign, CheckCircle, Clock, RotateCcw, Building2, BanknoteArrowUp, CreditCard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useDashboard } from '../../context/DashboardContext';
+import SuperAdminDashboard from '../SuperAdminDashboard';
 
 
 
@@ -204,29 +205,7 @@ const DashboardStats = () => {
           )}
 
           {user?.role === 'SUPER_ADMIN' && (
-            <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl shadow-sm border border-orange-200 overflow-hidden">
-              <div className="p-8">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="p-4 bg-orange-100 rounded-2xl">
-                    <Building2 className="w-12 h-12 text-orange-600" />
-                  </div>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
-                  Vue d'ensemble des entreprises
-                </h3>
-                <p className="text-center text-gray-600 mb-8">
-                  Gérez toutes les entreprises depuis cette interface centralisée
-                </p>
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => navigate('/companies')}
-                    className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  >
-                    Accéder à la gestion des entreprises
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SuperAdminDashboard />
           )}
 
           {user?.role === 'CAISSIER' && (
@@ -272,7 +251,7 @@ const DashboardStats = () => {
                         stats.upcomingPayments.slice(0, 5).map((payment, index) => (
                           <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
+                              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
                                 {payment.employee?.firstName?.charAt(0)}{payment.employee?.lastName?.charAt(0)}
                               </div>
                               <div>
@@ -308,35 +287,13 @@ const DashboardStats = () => {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl shadow-sm border border-orange-200 overflow-hidden">
-                    <div className="p-8">
-                      <div className="flex items-center justify-center mb-6">
-                        <div className="p-4 bg-orange-100 rounded-2xl">
-                          <TrendingUp className="w-12 h-12 text-orange-600" />
-                        </div>
-                      </div>
-                      <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
-                        Pointage QR Code
-                      </h3>
-                      <p className="text-center text-gray-600 mb-8">
-                        Scannez les QR codes des employés pour marquer automatiquement leur présence
-                      </p>
-                      <div className="flex justify-center">
-                        <button
-                          onClick={() => navigate('/daily-attendance')}
-                          className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                        >
-                          Commencer le pointage
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  
 
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                     <div className="p-8">
                       <div className="flex items-center justify-center mb-6">
                         <div className="p-4 bg-gray-100 rounded-2xl">
-                          <CreditCard className="w-12 h-12 text-gray-600" />
+                          <CreditCard className="w-12 h-12 text-orange-500" />
                         </div>
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
@@ -348,7 +305,7 @@ const DashboardStats = () => {
                       <div className="flex justify-center">
                         <button
                           onClick={() => navigate('/payments')}
-                          className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold rounded-xl hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                          className="px-8 py-4 bg-orange-500 text-white font-semibold rounded-xl hover:from-gray-700 hover:to-gray-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                         >
                           Accéder aux paiements
                         </button>

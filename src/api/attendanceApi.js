@@ -50,5 +50,17 @@ export const attendanceApi = {
   generateDefaultAttendances: async (payRunId) => {
     const response = await axios.post(`${API_BASE_URL}/attendances/generate-default/${payRunId}`);
     return response.data;
+  },
+
+  // Valider un QR code scanné
+  validateQRCode: async (qrData) => {
+    const response = await axios.post(`${API_BASE_URL}/qrcodes/validate`, { qrData });
+    return response.data;
+  },
+
+  // Marquer la présence avec un QR code
+  markAttendanceWithQR: async (payRunId, qrData) => {
+    const response = await axios.post(`${API_BASE_URL}/attendances/qr-scan/${payRunId}`, { qrData });
+    return response.data;
   }
 };

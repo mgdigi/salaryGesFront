@@ -258,9 +258,9 @@ const Payments = () => {
                         <div className="flex-1">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                              <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
                                 <span className="text-sm font-medium text-gray-700">
-                                  <ClipboardClock />
+                                  <ClipboardClock  className="text-white"/>
                                 </span>
                               </div>
                             </div>
@@ -290,7 +290,7 @@ const Payments = () => {
                           </button>
                           <button
                             onClick={() => openPaymentModal(payslip)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium"
+                            className="bg-gray-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium"
                           >
                             Payer
                           </button>

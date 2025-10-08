@@ -121,7 +121,7 @@ const LeaveManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center m-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Gestion des Congés</h2>
           <p className="text-gray-600 mt-1">
@@ -131,11 +131,11 @@ const LeaveManagement = () => {
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 m-8">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="w-6 h-6 text-blue-600" />
+            <div className="p-2  rounded-lg">
+              <FileText className="w-6 h-6 text-gray-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total</p>
@@ -144,10 +144,10 @@ const LeaveManagement = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 ">
           <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Clock className="w-6 h-6 text-yellow-600" />
+            <div className="p-2 rounded-lg">
+              <Clock className="w-6 h-6 text-gray-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">En attente</p>
@@ -158,8 +158,8 @@ const LeaveManagement = () => {
 
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="p-2  rounded-lg">
+              <CheckCircle className="w-6 h-6 text-gray-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Approuvées</p>
@@ -170,8 +170,8 @@ const LeaveManagement = () => {
 
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <XCircle className="w-6 h-6 text-red-600" />
+            <div className="p-2  rounded-lg">
+              <XCircle className="w-6 h-6 text-gray-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Rejetées</p>
@@ -182,7 +182,7 @@ const LeaveManagement = () => {
       </div>
 
       {/* Filtres */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 m-8">
         <div className="flex flex-wrap gap-2">
           <Button
             variant={filter === 'ALL' ? 'primary' : 'outline'}
@@ -216,7 +216,7 @@ const LeaveManagement = () => {
       </div>
 
       {/* Liste des congés */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white shadow overflow-hidden sm:rounded-md m-8">
         <ul className="divide-y divide-gray-200">
           {filteredLeaves.map((leave) => (
             <li key={leave.id} className="px-6 py-4">

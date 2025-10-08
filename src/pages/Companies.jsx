@@ -245,7 +245,7 @@ const CompaniesContent = () => {
 
   return (
     <Layout>
-      <div className="px-4 py-6 sm:px-0">
+      <div className="px-4 py-6 sm:px-0 m-20">
         <div className="flex justify-between items-center mb-6">
           <div className='ml-10'>
             <h1 className="text-2xl font-bold text-gray-900">

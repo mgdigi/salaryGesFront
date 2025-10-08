@@ -4,6 +4,7 @@ import { attendanceApi } from '../../api/attendanceApi';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import { Camera, CheckCircle, XCircle, Clock, User } from 'lucide-react';
+import jsQR from 'jsqr';
 
 const QRScanner = ({ payRunId, onAttendanceMarked }) => {
   const [isScanning, setIsScanning] = useState(false);
@@ -57,42 +58,90 @@ const QRScanner = ({ payRunId, onAttendanceMarked }) => {
   };
 
   const scanQRCode = async () => {
-    // Simulation du scan QR - dans un vrai projet, utiliser une bibliothèque comme jsQR
     const now = Date.now();
     if (now - lastScanTime < 2000) return; // Éviter les scans trop fréquents
 
     setLastScanTime(now);
 
-    // Simulation d'un scan réussi avec des données QR fictives
-    const mockQRData = {
-      employeeId: 'cmgf2zb170001tptt1d4ljfwl', // ID d'un employé existant
-      code: 'mock-scan-code-' + Date.now(),
-      timestamp: Date.now()
-    };
-
     try {
-      const result = await attendanceApi.markAttendanceWithQR(payRunId, JSON.stringify(mockQRData));
-      setScanResult({
-        success: true,
-        employee: result.employee,
-        type: result.type,
-        message: 'Présence marquée avec succès'
-      });
+      const imageData = captureFrame();
+      if (!imageData) {
+        setScanResult({
+          success: false,
+          error: 'Impossible de capturer l\'image',
+          message: 'Erreur de capture'
+        });
+        setShowResultModal(true);
+        return;
+      }
+
+      // Convertir l'image en données utilisables par jsQR
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+        if (code) {
+          try {
+            // Valider d'abord le QR code
+            const validationResult = await attendanceApi.validateQRCode(code.data);
+
+            if (validationResult.isValid) {
+              // Marquer la présence
+              const result = await attendanceApi.markAttendanceWithQR(payRunId, code.data);
+              setScanResult({
+                success: true,
+                employee: result.employee,
+                type: result.type,
+                message: 'Présence marquée avec succès'
+              });
+            } else {
+              setScanResult({
+                success: false,
+                error: 'QR code invalide ou expiré',
+                message: 'Code QR non valide'
+              });
+            }
+          } catch (error) {
+            setScanResult({
+              success: false,
+              error: error.response?.data?.error || 'Erreur lors du marquage',
+              message: 'Échec du marquage de présence'
+            });
+          }
+        } else {
+          setScanResult({
+            success: false,
+            error: 'Aucun QR code détecté',
+            message: 'QR code non trouvé'
+          });
+        }
+
+        setShowResultModal(true);
+
+        // Fermer automatiquement après 3 secondes
+        setTimeout(() => {
+          setShowResultModal(false);
+          setScanResult(null);
+        }, 3000);
+      };
+
+      img.src = imageData;
     } catch (error) {
+      console.error('Erreur lors du scan:', error);
       setScanResult({
         success: false,
-        error: error.response?.data?.error || 'Erreur lors du marquage',
-        message: 'Échec du marquage de présence'
+        error: 'Erreur technique lors du scan',
+        message: 'Erreur de scan'
       });
+      setShowResultModal(true);
     }
-
-    setShowResultModal(true);
-
-    // Fermer automatiquement après 3 secondes
-    setTimeout(() => {
-      setShowResultModal(false);
-      setScanResult(null);
-    }, 3000);
   };
 
   const handleManualScan = () => {

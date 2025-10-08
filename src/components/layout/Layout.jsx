@@ -77,8 +77,8 @@ const Layout = ({ children, stats: propStats }) => {
       { name: 'Employés', path: '/employees', icon: Users },
       { name: 'Cycles de paie', path: '/payruns', icon: BanknoteArrowUp },
       { name: 'Pointage quotidien', path: '/daily-attendance', icon: ClipboardClock },
-      { name: 'Congés', path: '/leaves', icon: Calendar },
-      { name: 'QR Codes', path: '/qr-codes', icon: QrCode },
+      // { name: 'Congés', path: '/leaves', icon: Calendar },
+      // { name: 'QR Codes', path: '/qr-codes', icon: QrCode },
     ],
     CAISSIER: [
       { name: 'Tableau de bord', path: '/dashboard', icon: CircleGauge },

@@ -89,8 +89,13 @@ const QRCodeGenerator = () => {
     try {
       const response = await qrCodeApi.getEmployeeQR(employee.id);
 
+      // Vérifier que les données QR existent
+      if (!response.qrCode || !response.qrCode.data) {
+        throw new Error('Données QR code non trouvées');
+      }
+
       // Générer l'image QR code à partir des données JSON
-      const qrCodeDataURL = await QRCode.toDataURL(response.data, {
+      const qrCodeDataURL = await QRCode.toDataURL(response.qrCode.data, {
         errorCorrectionLevel: 'M',
         margin: 1,
         color: {
@@ -102,13 +107,13 @@ const QRCodeGenerator = () => {
 
       setQrCodeData({
         employee,
-        qrCode: response,
+        qrCode: response.qrCode,
         qrCodeImage: qrCodeDataURL
       });
       setShowQRModal(true);
     } catch (error) {
       console.error('Erreur lors de la récupération du QR:', error);
-      Notification.error('Erreur', 'QR code non trouvé');
+      Notification.error('Erreur', 'QR code non trouvé ou invalide');
     }
   };
 
@@ -153,7 +158,7 @@ const QRCodeGenerator = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center m-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Gestion des QR Codes</h2>
           <p className="text-gray-600 mt-1">
@@ -170,7 +175,7 @@ const QRCodeGenerator = () => {
         </Button>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white shadow overflow-hidden sm:rounded-md m-8">
         <ul className="divide-y divide-gray-200">
           {employees.map((employee) => (
             <li key={employee.id} className="px-6 py-4">
